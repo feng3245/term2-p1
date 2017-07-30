@@ -78,7 +78,6 @@ cout << is_initialized_ << endl;
 
 
 
-    cout << "Before sensor check." << endl;
     // first measurement
     cout << "EKF: " << endl;
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
@@ -116,7 +115,6 @@ cout << is_initialized_ << endl;
     is_initialized_ = true;
     return;
   }
-  cout << "time stamp " << measurement_pack.timestamp_ << endl;
   //There is a chance of truncation/ lost information here but is negligable
     float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;
     previous_timestamp_ = measurement_pack.timestamp_;
@@ -170,8 +168,8 @@ cout << is_initialized_ << endl;
       ekf_.UpdateEKF(measurement_pack.raw_measurements_);
    } else {
      // laser updates
-     //ekf_.R_ = R_laser_;
-     //ekf_.Update(measurement_pack.raw_measurements_);
+     ekf_.R_ = R_laser_;
+     ekf_.Update(measurement_pack.raw_measurements_);
    }
 
   // print the output

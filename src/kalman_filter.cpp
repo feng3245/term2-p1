@@ -66,6 +66,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   TODO:
     * update the state by using Extended Kalman Filter equations
   */
+  Tools tools;
   VectorXd zmeasurement = z;
   VectorXd polarMeasurement = VectorXd(3);
   float theta;
@@ -93,7 +94,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   
   polarMeasurement << p,theta, ((x_[0]*x_[2]+x_[1]*x_[3])/p);
 
-  MatrixXd Hj = CalculateJacobian(x_);
+  MatrixXd Hj = tools.CalculateJacobian(x_);
  	VectorXd y = zmeasurement - polarMeasurement;
 	while(y[1] > M_PI)
 	{
@@ -115,30 +116,5 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 	MatrixXd I = MatrixXd::Identity(x_size, x_size);
 	P_ = (I - K * Hj) * P_;
 }
-Eigen::MatrixXd KalmanFilter::CalculateJacobian(const VectorXd& x_state) {
 
-	MatrixXd Hj = MatrixXd(3,4);
-	//recover state parameters
-	float px = x_state(0);
-	float py = x_state(1);
-	float vx = x_state(2);
-	float vy = x_state(3);
 
-	//pre-compute a set of terms to avoid repeated calculation
-	float c1 = px*px+py*py;
-	float c2 = sqrt(c1);
-	float c3 = (c1*c2);
-
-	//check division by zero
-	if(fabs(c1) < 0.0001){
-		cout << "CalculateJacobian () - Error - Division by Zero" << endl;
-		return Hj;
-	}
-
-	//compute the Jacobian matrix
-	Hj << (px/c2), (py/c2), 0, 0,
-		  -(py/c1), (px/c1), 0, 0,
-		  py*(vx*py - vy*px)/c3, px*(px*vy - py*vx)/c3, px/c2, py/c2;
-
-	return Hj;
-}
